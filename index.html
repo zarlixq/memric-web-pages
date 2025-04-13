@@ -1,111 +1,118 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Şifre Sıfırla | Memric</title>
+  <meta charset="UTF-8">
+  <title>Yeni Şifre Oluştur</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
-
     .container {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-      max-width: 400px;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       width: 100%;
+      max-width: 400px;
       text-align: center;
+      animation: fadeIn 0.6s ease-in-out;
     }
-
-    .container h2 {
+    h2 {
       margin-bottom: 20px;
       color: #333;
     }
-
-    .container p {
-      margin-bottom: 30px;
-      color: #555;
-    }
-
-    .container input[type="email"] {
+    input {
       width: 100%;
-      padding: 12px 20px;
-      margin-bottom: 20px;
+      padding: 12px;
+      margin: 8px 0;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
-
-    .container button {
-      background-color: #6a11cb;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
+      border-radius: 6px;
       font-size: 16px;
-      transition: background-color 0.3s ease;
     }
-
-    .container button:hover {
-      background-color: #5b0eb5;
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #7b2cbf;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
     }
-
+    button:hover {
+      background-color: #5a189a;
+    }
     .message {
-      margin-top: 20px;
-      color: green;
+      margin-top: 10px;
+      font-size: 14px;
     }
-
     .error {
-      margin-top: 20px;
-      color: red;
+      color: #d00000;
+    }
+    .success {
+      color: #007f5f;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Şifreni mi unuttun?</h2>
-    <p>Şifre sıfırlama bağlantısı almak için e-posta adresini gir.</p>
-    <form id="resetForm">
-      <input type="email" id="email" placeholder="E-posta adresin" required />
-      <button type="submit">Bağlantı Gönder</button>
-    </form>
-    <div id="responseMessage" class="message" style="display: none;"></div>
-    <div id="errorMessage" class="error" style="display: none;"></div>
+    <h2>Yeni Şifre Belirle</h2>
+    <input type="password" id="password" placeholder="Yeni şifre">
+    <input type="password" id="confirm" placeholder="Şifre tekrar">
+    <button onclick="updatePassword()">Şifreyi Güncelle</button>
+    <div id="message" class="message"></div>
   </div>
 
   <script>
-    const form = document.getElementById('resetForm');
-    const responseMessage = document.getElementById('responseMessage');
-    const errorMessage = document.getElementById('errorMessage');
+    const supabase = supabase.createClient(
+      'https://mqkszsrzorpjahobuwad.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xa3N6c3J6b3JwamFob2J1d2FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4MzI5NTQsImV4cCI6MjA1NjQwODk1NH0.4Q4m5TlHp7hJgr7ua_RRBAiZFdA0Ag4oaN-FM_Qe55E'
+    );
 
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
+    async function updatePassword() {
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+      const msg = document.getElementById('message');
 
-      // Burada gerçek şifre sıfırlama işlemini gerçekleştirecek API çağrısı yapılmalı.
-      // Örneğin, Supabase veya başka bir backend servisi kullanılabilir.
+      msg.textContent = '';
+      msg.className = 'message';
 
-      // Örnek başarı mesajı:
-      responseMessage.style.display = 'block';
-      responseMessage.textContent = 'E-posta adresine şifre sıfırlama bağlantısı gönderildi.';
-      errorMessage.style.display = 'none';
+      if (password.length < 8) {
+        msg.textContent = 'Şifre en az 8 karakter olmalı.';
+        msg.classList.add('error');
+        return;
+      }
+      if (password !== confirm) {
+        msg.textContent = 'Şifreler uyuşmuyor.';
+        msg.classList.add('error');
+        return;
+      }
 
-      // Eğer hata oluşursa, aşağıdaki satırları kullanabilirsin:
-      // errorMessage.style.display = 'block';
-      // errorMessage.textContent = 'Bir hata oluştu. Lütfen tekrar deneyin.';
-      // responseMessage.style.display = 'none';
-    });
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
+
+      if (error) {
+        msg.textContent = 'Hata: ' + error.message;
+        msg.classList.add('error');
+      } else {
+        msg.textContent = 'Şifren başarıyla güncellendi!';
+        msg.classList.add('success');
+      }
+    }
   </script>
 </body>
 </html>
