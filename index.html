@@ -3,66 +3,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Şifre Sıfırla - Memric</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Memric | Şifre Sıfırla</title>
   <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f9f9ff;
       margin: 0;
       padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #6C63FF, #9575CD);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      color: white;
     }
 
     .container {
       background-color: white;
-      padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      width: 100%;
-    }
-
-    h2 {
-      margin-bottom: 24px;
-      font-size: 22px;
-      text-align: center;
       color: #333;
+      padding: 40px 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      animation: fadeIn 0.6s ease-in;
     }
 
-    input {
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #6C63FF;
+    }
+
+    input[type="password"],
+    input[type="text"] {
       width: 100%;
       padding: 12px;
-      margin: 8px 0 16px;
-      border: 1px solid #ccc;
+      margin: 10px 0;
       border-radius: 8px;
+      border: 1px solid #ccc;
       font-size: 16px;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .checkbox input {
+      margin-right: 8px;
     }
 
     button {
       width: 100%;
-      background-color: #6c63ff;
-      color: white;
       padding: 12px;
+      background-color: #6C63FF;
+      color: white;
       border: none;
       border-radius: 8px;
       font-weight: bold;
       font-size: 16px;
+      margin-top: 16px;
       cursor: pointer;
     }
 
-    button:disabled {
-      background-color: #ccc;
-    }
-
     .message {
-      margin-top: 16px;
       text-align: center;
       font-size: 14px;
+      margin-top: 16px;
     }
 
     .message.success {
@@ -72,50 +89,59 @@
     .message.error {
       color: red;
     }
+
+    .brand {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #999;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Yeni Şifre Belirle</h2>
-    <input type="password" id="new-password" placeholder="Yeni şifre" />
-    <input type="password" id="confirm-password" placeholder="Şifreyi tekrar girin" />
+    <h1>Memric</h1>
+    <input type="password" id="new-password" placeholder="Yeni şifre">
+    <input type="password" id="confirm-password" placeholder="Şifreyi tekrar girin">
+    
+    <div class="checkbox">
+      <input type="checkbox" id="toggle-password" onchange="togglePasswordVisibility()"> Şifreyi göster
+    </div>
+
     <button onclick="updatePassword()">Şifreyi Güncelle</button>
-    <div class="message" id="message"></div>
+    <div id="message" class="message"></div>
+    <div class="brand">memric.vercel.app</div>
   </div>
 
   <script>
-    const supabase = supabase.createClient(
+    const supabase = window.supabase.createClient(
       "https://mqkszsrzorpjahobuwad.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xa3N6c3J6b3JwamFob2J1d2FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4MzI5NTQsImV4cCI6MjA1NjQwODk1NH0.4Q4m5TlHp7hJgr7ua_RRBAiZFdA0Ag4oaN-FM_Qe55E" // ← Buraya kendi anon key'ini koy
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // ← buraya anon key'ini koy
     );
 
-    // URL'den token'ları al ve oturum başlat
-    async function initSessionFromUrl() {
+    window.onload = async function() {
       try {
-        const hashParams = new URLSearchParams(window.location.hash.substr(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        const type = hashParams.get('type');
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
+        const type = hashParams.get("type");
 
-        if (type === 'recovery' && accessToken && refreshToken) {
+        if (type === "recovery" && accessToken && refreshToken) {
           const { error } = await supabase.auth.setSession({
             access_token: accessToken,
-            refresh_token: refreshToken
+            refresh_token: refreshToken,
           });
 
           if (error) {
-            document.getElementById("message").textContent = "Bağlantı geçersiz veya süresi dolmuş.";
-            document.getElementById("message").classList.add("error");
+            showMessage("Bağlantı geçersiz veya süresi dolmuş.", "error");
           }
         }
       } catch (e) {
-        console.error("Oturum başlatılırken hata:", e);
-        document.getElementById("message").textContent = "Beklenmeyen bir hata oluştu.";
-        document.getElementById("message").classList.add("error");
+        showMessage("Oturum başlatılırken hata oluştu: " + e.message, "error");
       }
-    }
+    };
 
-    // Şifreyi güncelle
     async function updatePassword() {
       const newPassword = document.getElementById("new-password").value.trim();
       const confirmPassword = document.getElementById("confirm-password").value.trim();
@@ -124,15 +150,11 @@
       message.className = "message";
 
       if (newPassword.length < 8) {
-        message.textContent = "Şifre en az 8 karakter olmalı.";
-        message.classList.add("error");
-        return;
+        return showMessage("Şifre en az 8 karakter olmalı.", "error");
       }
 
       if (newPassword !== confirmPassword) {
-        message.textContent = "Şifreler uyuşmuyor.";
-        message.classList.add("error");
-        return;
+        return showMessage("Şifreler uyuşmuyor.", "error");
       }
 
       try {
@@ -141,20 +163,28 @@
         });
 
         if (error) {
-          message.textContent = "Hata: " + error.message;
-          message.classList.add("error");
+          showMessage("Hata: " + error.message, "error");
         } else {
-          message.textContent = "Şifre başarıyla güncellendi.";
-          message.classList.add("success");
+          showMessage("Şifre başarıyla güncellendi 🎉", "success");
         }
       } catch (e) {
-        message.textContent = "Bir hata oluştu: " + e.message;
-        message.classList.add("error");
+        showMessage("Bir hata oluştu: " + e.message, "error");
       }
     }
 
-    // Sayfa açıldığında URL'den token al ve oturum başlat
-    window.onload = initSessionFromUrl;
+    function showMessage(text, type) {
+      const message = document.getElementById("message");
+      message.textContent = text;
+      message.className = "message " + type;
+    }
+
+    function togglePasswordVisibility() {
+      const pw1 = document.getElementById("new-password");
+      const pw2 = document.getElementById("confirm-password");
+      const type = pw1.type === "password" ? "text" : "password";
+      pw1.type = type;
+      pw2.type = type;
+    }
   </script>
 </body>
 </html>
