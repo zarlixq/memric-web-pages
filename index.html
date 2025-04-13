@@ -1,116 +1,128 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Yeni Şifre Oluştur</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Şifre Sıfırla - Memric</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f4f4;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9ff;
       margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
+
     .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      width: 100%;
+      background-color: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       max-width: 400px;
-      text-align: center;
-      animation: fadeIn 0.6s ease-in-out;
+      width: 100%;
     }
+
     h2 {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      font-size: 22px;
+      text-align: center;
       color: #333;
     }
+
     input {
       width: 100%;
       padding: 12px;
-      margin: 8px 0;
+      margin: 8px 0 16px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 16px;
     }
+
     button {
       width: 100%;
-      padding: 14px;
-      background-color: #7b2cbf;
+      background-color: #6c63ff;
       color: white;
+      padding: 12px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
+      font-weight: bold;
       font-size: 16px;
       cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
     }
-    button:hover {
-      background-color: #5a189a;
+
+    button:disabled {
+      background-color: #ccc;
     }
+
     .message {
-      margin-top: 10px;
+      margin-top: 16px;
+      text-align: center;
       font-size: 14px;
     }
-    .error {
-      color: #d00000;
+
+    .message.success {
+      color: green;
     }
-    .success {
-      color: #007f5f;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+
+    .message.error {
+      color: red;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Yeni Şifre Belirle</h2>
-    <input type="password" id="password" placeholder="Yeni şifre">
-    <input type="password" id="confirm" placeholder="Şifre tekrar">
+    <input type="password" id="new-password" placeholder="Yeni şifre" />
+    <input type="password" id="confirm-password" placeholder="Şifreyi tekrar girin" />
     <button onclick="updatePassword()">Şifreyi Güncelle</button>
-    <div id="message" class="message"></div>
+    <div class="message" id="message"></div>
   </div>
 
   <script>
     const supabase = supabase.createClient(
-      'https://mqkszsrzorpjahobuwad.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xa3N6c3J6b3JwamFob2J1d2FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4MzI5NTQsImV4cCI6MjA1NjQwODk1NH0.4Q4m5TlHp7hJgr7ua_RRBAiZFdA0Ag4oaN-FM_Qe55E'
+      "https://mqkszsrzorpjahobuwad.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     );
 
     async function updatePassword() {
-      const password = document.getElementById('password').value;
-      const confirm = document.getElementById('confirm').value;
-      const msg = document.getElementById('message');
+      const newPassword = document.getElementById("new-password").value.trim();
+      const confirmPassword = document.getElementById("confirm-password").value.trim();
+      const message = document.getElementById("message");
+      message.textContent = "";
+      message.className = "message";
 
-      msg.textContent = '';
-      msg.className = 'message';
-
-      if (password.length < 8) {
-        msg.textContent = 'Şifre en az 8 karakter olmalı.';
-        msg.classList.add('error');
-        return;
-      }
-      if (password !== confirm) {
-        msg.textContent = 'Şifreler uyuşmuyor.';
-        msg.classList.add('error');
+      if (newPassword.length < 8) {
+        message.textContent = "Şifre en az 8 karakter olmalı.";
+        message.classList.add("error");
         return;
       }
 
-      const { error } = await supabase.auth.updateUser({
-        password: password
-      });
+      if (newPassword !== confirmPassword) {
+        message.textContent = "Şifreler uyuşmuyor.";
+        message.classList.add("error");
+        return;
+      }
 
-      if (error) {
-        msg.textContent = 'Hata: ' + error.message;
-        msg.classList.add('error');
-      } else {
-        msg.textContent = 'Şifren başarıyla güncellendi!';
-        msg.classList.add('success');
+      try {
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+
+        if (error) {
+          message.textContent = "Hata: " + error.message;
+          message.classList.add("error");
+        } else {
+          message.textContent = "Şifre başarıyla güncellendi.";
+          message.classList.add("success");
+        }
+      } catch (e) {
+        message.textContent = "Bir hata oluştu: " + e.message;
+        message.classList.add("error");
       }
     }
   </script>
