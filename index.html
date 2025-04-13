@@ -8,18 +8,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #D291FF, #A25EFF);
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    color: white;
-}
-
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #D291FF, #A25EFF);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
 
     .container {
       background-color: white;
@@ -111,18 +109,19 @@
       <input type="checkbox" id="toggle-password" onchange="togglePasswordVisibility()"> Şifreyi göster
     </div>
 
-    <button onclick="updatePassword()">Şifreyi Güncelle</button>
+    <button id="update-btn">Şifreyi Güncelle</button>
     <div id="message" class="message"></div>
     <div class="brand">memric.vercel.app</div>
   </div>
 
   <script>
-    const supabase = window.supabase.createClient(
-      "https://mqkszsrzorpjahobuwad.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // ← buraya anon key'ini koy
-    );
+    window.addEventListener("DOMContentLoaded", async () => {
+      const supabase = window.supabase.createClient(
+        "https://mqkszsrzorpjahobuwad.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // ← kendi anon key'in
+      );
 
-    window.onload = async function() {
+      // Token'dan oturumu başlat
       try {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get("access_token");
@@ -142,51 +141,53 @@
       } catch (e) {
         showMessage("Oturum başlatılırken hata oluştu: " + e.message, "error");
       }
-    };
 
-    async function updatePassword() {
-      const newPassword = document.getElementById("new-password").value.trim();
-      const confirmPassword = document.getElementById("confirm-password").value.trim();
-      const message = document.getElementById("message");
-      message.textContent = "";
-      message.className = "message";
+      // Şifreyi güncelleme butonuna tıklanınca
+      document.getElementById("update-btn").addEventListener("click", async () => {
+        const newPassword = document.getElementById("new-password").value.trim();
+        const confirmPassword = document.getElementById("confirm-password").value.trim();
+        const message = document.getElementById("message");
+        message.textContent = "";
+        message.className = "message";
 
-      if (newPassword.length < 8) {
-        return showMessage("Şifre en az 8 karakter olmalı.", "error");
-      }
-
-      if (newPassword !== confirmPassword) {
-        return showMessage("Şifreler uyuşmuyor.", "error");
-      }
-
-      try {
-        const { error } = await supabase.auth.updateUser({
-          password: newPassword,
-        });
-
-        if (error) {
-          showMessage("Hata: " + error.message, "error");
-        } else {
-          showMessage("Şifre başarıyla güncellendi 🎉", "success");
+        if (newPassword.length < 8) {
+          return showMessage("Şifre en az 8 karakter olmalı.", "error");
         }
-      } catch (e) {
-        showMessage("Bir hata oluştu: " + e.message, "error");
-      }
-    }
 
-    function showMessage(text, type) {
-      const message = document.getElementById("message");
-      message.textContent = text;
-      message.className = "message " + type;
-    }
+        if (newPassword !== confirmPassword) {
+          return showMessage("Şifreler uyuşmuyor.", "error");
+        }
 
-    function togglePasswordVisibility() {
-      const pw1 = document.getElementById("new-password");
-      const pw2 = document.getElementById("confirm-password");
-      const type = pw1.type === "password" ? "text" : "password";
-      pw1.type = type;
-      pw2.type = type;
-    }
+        try {
+          const { error } = await supabase.auth.updateUser({
+            password: newPassword,
+          });
+
+          if (error) {
+            showMessage("Hata: " + error.message, "error");
+          } else {
+            showMessage("Şifre başarıyla güncellendi 🎉", "success");
+          }
+        } catch (e) {
+          showMessage("Bir hata oluştu: " + e.message, "error");
+        }
+      });
+
+      // Yardımcı fonksiyonlar
+      window.showMessage = function (text, type) {
+        const message = document.getElementById("message");
+        message.textContent = text;
+        message.className = "message " + type;
+      };
+
+      window.togglePasswordVisibility = function () {
+        const pw1 = document.getElementById("new-password");
+        const pw2 = document.getElementById("confirm-password");
+        const type = pw1.type === "password" ? "text" : "password";
+        pw1.type = type;
+        pw2.type = type;
+      };
+    });
   </script>
 </body>
 </html>
