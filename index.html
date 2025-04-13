@@ -86,9 +86,36 @@
   <script>
     const supabase = supabase.createClient(
       "https://mqkszsrzorpjahobuwad.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xa3N6c3J6b3JwamFob2J1d2FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4MzI5NTQsImV4cCI6MjA1NjQwODk1NH0.4Q4m5TlHp7hJgr7ua_RRBAiZFdA0Ag4oaN-FM_Qe55E" // ← Buraya kendi anon key'ini koy
     );
 
+    // URL'den token'ları al ve oturum başlat
+    async function initSessionFromUrl() {
+      try {
+        const hashParams = new URLSearchParams(window.location.hash.substr(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const type = hashParams.get('type');
+
+        if (type === 'recovery' && accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+
+          if (error) {
+            document.getElementById("message").textContent = "Bağlantı geçersiz veya süresi dolmuş.";
+            document.getElementById("message").classList.add("error");
+          }
+        }
+      } catch (e) {
+        console.error("Oturum başlatılırken hata:", e);
+        document.getElementById("message").textContent = "Beklenmeyen bir hata oluştu.";
+        document.getElementById("message").classList.add("error");
+      }
+    }
+
+    // Şifreyi güncelle
     async function updatePassword() {
       const newPassword = document.getElementById("new-password").value.trim();
       const confirmPassword = document.getElementById("confirm-password").value.trim();
@@ -125,6 +152,9 @@
         message.classList.add("error");
       }
     }
+
+    // Sayfa açıldığında URL'den token al ve oturum başlat
+    window.onload = initSessionFromUrl;
   </script>
 </body>
 </html>
